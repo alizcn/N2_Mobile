@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: n2_mobile_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./n2_mobile:/app/n2_mobile
+      - ./api:/app/api
+      - ./staticfiles:/app/staticfiles
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - POSTGRES_DB=n2_mobile
+      - POSTGRES_USER=ali
+      - POSTGRES_PASSWORD=ali12345
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    networks:
+      - n2_mobile_network
+
+  db:
+    image: postgres:13
+    container_name: n2_mobile_db
+    environment:
+      POSTGRES_DB: n2_mobile
+      POSTGRES_USER: ali
+      POSTGRES_PASSWORD: ali12345
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - n2_mobile_network
+
+  redis:
+    image: redis:alpine
+    container_name: n2_mobile_redis
+    networks:
+      - n2_mobile_network 
+
+volumes:
+  postgres_data:
+
+networks:
+  n2_mobile_network: 
+    driver: bridge
